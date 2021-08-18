@@ -32,8 +32,7 @@ class Randomizer:
         return random.choice(self.champions)
 
     def addPlayer(self, player):
-        if len(self.players) < 5:
-            self.players.append(player)
+        self.players.append(player)
     
     def removePlayer(self, player):
         self.players.remove(player)
@@ -44,14 +43,36 @@ class Randomizer:
     def getTeamEmb(self):
         self.refreshEmbed()
         return self.ranTeamEmb
+    def mixPlayers(self):
+        teamOne = []
+        teamTwo = []
+        turn = True
+        while len(self.players) != 0:
+            player = random.choice(self.players)
+            self.players.remove(player)
+            if turn:
+                teamOne.append(player)
+                turn = False
+            else:
+                teamTwo.append(player)
+                turn = True
+        strTeamOne = '\n'.join(teamOne)
+        strTeamTwo = '\n'.join(teamTwo)
+        embed = Embed(title = 'Team 1', description = strTeamOne, colour = discord.Colour.red())
+        embed.add_field(name= 'Team 2', value = strTeamTwo)
+        return embed
 
     def makeTeam(self):
+        while len(self.players) > 5:
+            del self.players[-1]
         playersEmb = []
         for player in self.players:
             hisRole = random.choice(self.roles)
             hisChamp = random.choice(self.champions)
             hisColour = self.laneColors.get(hisRole)
             hisEmb = Embed(title = player, description = '**'+hisChamp+' - '+hisRole+'**', color = hisColour)
+            if(hisChamp == 'Wukong'):
+                hisChamp = 'MonkeyKing'
             hisEmb.set_thumbnail(url = 'https://static.u.gg/assets/lol/riot_static/11.16.1/img/champion/'+hisChamp+'.png')
             playersEmb.append(hisEmb)
             self.roles.remove(hisRole)

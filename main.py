@@ -13,7 +13,6 @@ token = os.getenv('TOKEN')
 
 
 randomizer = Randomizer()
-
 @client.event
 async def on_ready():
     print('Logged in as {0.user}'.format(client))
@@ -21,14 +20,18 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    msg = message.content.lower()
+    msg = message.content.lower()    
+    global teamMsg
     #sends a random champion
     if (msg.startswith('!champ')):
-        await message.channel.send(randomizer.randomChamp())
+        hisChamp = randomizer.randomChamp()
+        if (hisChamp == 'Wukong'):
+            hisChamp = 'MonkeyKing'
+        await message.channel.send('https://static.u.gg/assets/lol/riot_static/11.16.1/img/champion/'+hisChamp+'.png')
     
     #sends a list of counters
     elif (msg.startswith('!counter')):
-        champ = message.replace('!counter', '').strip()
+        champ = msg.replace('!counter', '').strip()
         for champion in  getCounterList(champ):
             await message.channel.send(champion)
 
@@ -36,12 +39,22 @@ async def on_message(message):
     elif msg.startswith('!team random'):
         randomizer.reset()
         randomizer.addPlayer(message.author.display_name)
-        global ranTeamMsg
-        ranTeamMsg = await message.channel.send(embed = randomizer.getTeamEmb())
-        await ranTeamMsg.add_reaction('✋')
-        await ranTeamMsg.add_reaction('▶️')
-        await ranTeamMsg.add_reaction('🚪')
+        teamMsg = await message.channel.send(embed = randomizer.getTeamEmb())
+        await teamMsg.add_reaction('✋')
+        await teamMsg.add_reaction('▶️')
+        await teamMsg.add_reaction('🚪')
     
+    #Mixes up players in two teams
+    elif msg.startswith('!mix'):
+        randomizer.reset()
+        randomizer.addPlayer(message.author.display_name)
+        teamMsg = await message.channel.send(embed = randomizer.getTeamEmb())
+        await teamMsg.add_reaction('✋')
+        await teamMsg.add_reaction('▶️')
+        await teamMsg.add_reaction('🚪')
+        global mixingTeam
+        mixingTeam = True
+    #Tells you all the commands
     elif msg.startswith('!help'):
         await message.channel.send('!champ - To get a random champion\n!counter champion- To get the counter list of a champion\n!team random - To make a team and then get a random champ and lane each\n!drank player- To get the rank of a player')
 
@@ -52,16 +65,19 @@ async def on_reaction_add(reaction, user):
         await reaction.remove(user)
         if reaction.emoji == '✋' and username not in randomizer.getPlayers():
             randomizer.addPlayer(username)
-            await ranTeamMsg.edit(embed = randomizer.getTeamEmb())
+            await teamMsg.edit(embed = randomizer.getTeamEmb())
 
         elif reaction.emoji == '🚪' and username in randomizer.getPlayers():
             randomizer.removePlayer(user)
-            await ranTeamMsg.edit(embed = randomizer.getTeamEmb())
+            await teamMsg.edit(embed = randomizer.getTeamEmb())
 
         elif reaction.emoji == '▶️' and len(randomizer.getPlayers()) >= 1:
             await reaction.message.delete()
-            for embed in randomizer.makeTeam():
-                await reaction.message.channel.send(embed = embed)
+            if mixingTeam == True:
+                await reaction.message.channel.send(embed = randomizer.mixPlayers())
+            else:
+                for embed in randomizer.makeTeam():
+                    await reaction.message.channel.send(embed = embed)
 
 
 client.run(token)
