@@ -2,3 +2,5 @@
 __pycache__
 #bot token
 .env
+#file to test small thigns
+test.py

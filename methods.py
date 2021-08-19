@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 
 def getCounterList(champ):
-    champName = champ[0].upper() + champ[1:]
+    champ = champ.capitalize()
     url = 'https://u.gg/lol/champions/%s/counter'%champ
     champList = []
     page = requests.get(url)
@@ -10,14 +10,14 @@ def getCounterList(champ):
     try:
         counterList = htmlOfPage.find(class_='counters-list')
         champs = counterList.find_all(class_='counter-list-card')
-        champList.append('Best picks VS %s'%champName)
+        champList.append('Best picks VS %s'%champ)
         for champion in champs:
             champList.append(champion.find(class_='champion-name').text + ' - ' + champion.find(class_='win-rate').text )
     except AttributeError:
-        if champName == 'Hmar' or champName == 'Khanzir' or champName == 'Haiwan' or champName == 'Calb' or champName == 'Db':
-            champList.append('L\'unico %s qua sei tu'%champName)
+        if champ == 'Hmar' or champ == 'Khanzir' or champ == 'Haiwan' or champ == 'Calb' or champ == 'Db':
+            champList.append('L\'unico %s qua sei tu'%champ)
         else:
-            champList.append('Ma levati, chi vuoi trollare? %s non esiste!'%champName)
+            champList.append('Ma levati, chi vuoi trollare? %s non esiste!'%champ)
     return champList
 
   
