@@ -13,6 +13,8 @@ token = os.getenv('TOKEN')
 
 
 randomizer = Randomizer()
+global mixingTeam
+mixingTeam = False
 @client.event
 async def on_ready():
     print('Logged in as {0.user}'.format(client))
@@ -99,7 +101,7 @@ async def on_reaction_add(reaction, user):
             await reaction.message.delete()
             randomizer.reset()
 
-        elif voting == True and username not in randomizer.getPlayers():
+        elif voting == True and reaction.emoji != '✋'  and username not in randomizer.getPlayers():
             randomizer.addPlayer(username)
             randomizer.addVote(reaction.emoji[0])
             await sentMsg.edit(embed = randomizer.refreshCount())
