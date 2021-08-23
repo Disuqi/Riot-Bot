@@ -15,6 +15,13 @@ token = os.getenv('TOKEN')
 randomizer = Randomizer()
 global mixingTeam
 mixingTeam = False
+global voting 
+voting = False
+
+helpEmb = discord.Embed(title = 'Commands:' , description = '**!champ** - To get a random champion\n**!counter champion**- To get the counter list of a champion\n**!rteam** - To make a team and then get a random champ and lane each\n**!drank player** - To get the rank of a player(replace player with summonerName)\n**!mix** - To mix players into two teams \n**!vote a, b, c...** - To make a poll where everyone can vote only once(replace a, b and c with what ever you want, the limit is 9 items).')
+helpEmb.set_thumbnail(url= 'https://contenthub-static.grammarly.com/blog/wp-content/uploads/2018/05/how-to-ask-for-help-760x400.jpg')
+helpEmb.color = discord.Color.blue()
+
 @client.event
 async def on_ready():
     print('Logged in as {0.user}'.format(client))
@@ -37,7 +44,7 @@ async def on_message(message):
             await message.channel.send(champion)
 
     #Makes an embed for your team with random champs and roles
-    elif msg.startswith('!team random'):
+    elif msg.startswith('!rteam'):
         randomizer.reset()
         randomizer.addPlayer(message.author.display_name)
         sentMsg = await message.channel.send(embed = randomizer.getTeamEmb())
@@ -49,6 +56,7 @@ async def on_message(message):
     elif msg.startswith('!mix'):
         randomizer.reset()
         randomizer.addPlayer(message.author.display_name)
+        randomizer.mixEmb()
         sentMsg = await message.channel.send(embed = randomizer.getTeamEmb())
         await sentMsg.add_reaction('✋')
         await sentMsg.add_reaction('▶️')
@@ -60,9 +68,13 @@ async def on_message(message):
     elif msg.startswith('!vote'):
         randomizer.reset()
         votingItems = msg.removeprefix('!vote').strip().split(',')
+        lenVI = len(votingItems)
         sentMsg = await message.channel.send(embed = randomizer.makePoll(votingItems))
-        for i in range(0, len(votingItems)):
-            await sentMsg.add_reaction("%s\u20e3"%str(i+1))
+        if lenVI == 1:
+            await sentMsg.add_reaction('👍')
+        else:
+            for i in range(0, len(votingItems)):
+                await sentMsg.add_reaction("%s\u20e3"%str(i+1))
         await sentMsg.add_reaction('🛑')
         global voting
         voting = True
@@ -74,8 +86,8 @@ async def on_message(message):
         for rank in getSummoner(summoner):
             await message.channel.send(rank)
     #Tells you all the commands
-    elif msg.startswith('!help'):
-        await message.channel.send('```!champ - To get a random champion\n!counter champion- To get the counter list of a champion\n!team random - To make a team and then get a random champ and lane each\n!drank player- To get the rank of a player(replace player with summonerName)\n!mix - To mix players into two teams \n!vote a, b, c - To make a poll where everyone can vote only once(replace a, b and c with what ever you want, the limit is 9 items).```')
+    elif msg.startswith('!help') or msg.startswith('!h'):
+        await message.channel.send(embed = helpEmb)
 
 @client.event
 async def on_reaction_add(reaction, user):
@@ -103,7 +115,10 @@ async def on_reaction_add(reaction, user):
 
         elif voting == True and reaction.emoji != '✋'  and username not in randomizer.getPlayers():
             randomizer.addPlayer(username)
-            randomizer.addVote(reaction.emoji[0])
+            if reaction.emoji == '👍':
+                randomizer.addVote(1)
+            else:
+                randomizer.addVote(reaction.emoji[0])
             await sentMsg.edit(embed = randomizer.refreshCount())
 
 

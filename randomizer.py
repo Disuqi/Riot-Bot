@@ -57,6 +57,12 @@ class Randomizer:
         self.refreshEmbed()
         return self.ranTeamEmb
 
+    def mixEmb(self):
+        self.refreshEmbed()
+        self.ranTeamEmb.title = 'Team Mixer';
+        self.ranTeamEmb.set_thumbnail(url = 'https://media.giphy.com/media/3o6nV13mJfFfMkfgfm/giphy.gif?cid=ecf05e47o6ihpkhq4krw3kh1nxxfnf6i4mz693kqwacbcfn4&rid=giphy.gif&ct=g')
+        self.ranTeamEmb.color = discord.Color.random()
+
     def mixPlayers(self):
         teamOne = []
         teamTwo = []
@@ -94,17 +100,28 @@ class Randomizer:
         return playersEmb
     
     def makePoll(self, votingItems):
-        self.pollEmb = Embed(description = '**Vote here**')
-        for i in range(0, len(votingItems)):
-            self.voteCounter[i] = 0
-            item = votingItems[i].capitalize()
-            self.pollEmb.insert_field_at(index = i, name=str(i+1) +'.'+item, value='**'+str(self.voteCounter.get(i))+ '**')
-            self.votingItems.append(item)
+        self.votingItems = list(map(lambda item: item.capitalize(), votingItems))
+        self.pollEmb = Embed(description = '**Vote Here**')
+        if len(votingItems) == 1:
+            self.voteCounter[0] = 0
+            item = votingItems[0].capitalize()
+            self.pollEmb.title = 'Vote Here'
+            self.pollEmb.description = 'Press 👍 if you agree!'
+            self.pollEmb.insert_field_at(index = 0, name = item, value='**'+str(self.voteCounter.get(0))+ '**')
+        else:
+            for i in range(0, len(votingItems)):
+                self.voteCounter[i] = 0
+                item = votingItems[i].capitalize()
+                self.pollEmb.insert_field_at(index = i, name=str(i+1) +' '+item, value='**'+str(self.voteCounter.get(i))+ '**')
         return self.pollEmb
 
     def refreshCount(self):
-        for i in range(0, len(self.votingItems)):
-            self.pollEmb.set_field_at(index = i,name = str(i+1) +'.'+self.votingItems[i], value ='**'+str(self.voteCounter.get(i))+ '**' )
+        lenVI = len(self.votingItems)
+        if lenVI == 1:
+            self.pollEmb.set_field_at(index = 0,name = self.votingItems[0], value ='**'+str(self.voteCounter.get(0))+ '**' )
+        else:
+            for i in range(0, lenVI):
+                self.pollEmb.set_field_at(index = i,name = str(i+1) +' '+self.votingItems[i], value ='**'+str(self.voteCounter.get(i))+ '**' )
         return self.pollEmb
     
     def addVote(self, number):
