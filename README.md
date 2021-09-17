@@ -1,6 +1,6 @@
 # League-of-Legends-Bot
 A Discord bot that has some features to help you in the game called League of Legends. 
-##Commands (not up to date)
+## Commands (not up to date)
 ### !champ
 This command gives you an image for a random champion, I did this so that if you want a random champ pick in a draft game or ranked you can do so. I did this beacause the game does not allow you to pick random champs in those two specific game modes (Draft normal and any ranked game)
 ### !counter champion
